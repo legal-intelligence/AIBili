@@ -1,9 +1,6 @@
-# This module handles Bilibili API interactions.
 import urllib
 import urllib.request
 import random
-import json
-import requests
 
 
 def requests_headers():  # 构造请求头池
