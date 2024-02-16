@@ -3,7 +3,6 @@ import json
 from BilibiliDownloader.src.proxy_pool import request_proxies
 
 
-
 def getCidAndTitle(bvid, p=1):
     opener = request_proxies()
     url = 'https://api.bilibili.com/x/web-interface/view?bvid=' + bvid

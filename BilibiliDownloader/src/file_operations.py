@@ -14,6 +14,21 @@ def get_bv_list(csv_file_path):
     return bv_list
 
 
+def save_bv_list(csv_file_path, bv_list):
+    if file_exists(csv_file_path):
+        # 获取现有的 bv_list
+        existing_bv_list = get_bv_list(csv_file_path)
+        # 将新的 bv_list 添加到现有的 bv_list 中
+        merged_bv_list = existing_bv_list + bv_list
+    else:
+        merged_bv_list = bv_list
+    # 将后续获取的bv_list添加到csv文件中
+    with open(csv_file_path, 'a', newline='', encoding='utf-8') as csvfile:
+        writer = csv.writer(csvfile)
+        for bv in merged_bv_list:
+            writer.writerow([bv])
+
+
 def save_information(info_dict, json_file_path):
     with open(json_file_path, 'w', encoding='utf-8') as jsonfile:
         json.dump(info_dict, jsonfile, ensure_ascii=False, indent=4)
