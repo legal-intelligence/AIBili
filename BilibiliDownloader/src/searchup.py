@@ -32,7 +32,7 @@ def get_info():
             'cookie': "_uuid=38505D66-5836-7006-B441-D8A7F44B081255211infoc; buvid3=2FA7C975-1F6B-47FC-961D-B998597045C953923infoc; sid=jtgdj478; LIVE_BUVID=AUTO5015857997467736; rpdid=|(~u|RmYY)J0J'ul)l~mm~R~; LIVE_PLAYER_TYPE=2; blackside_state=1; fingerprint=b7046ad02d6444e63a99648735729cdc; buvid_fp=2FA7C975-1F6B-47FC-961D-B998597045C953923infoc; buvid_fp_plain=2FA7C975-1F6B-47FC-961D-B998597045C953923infoc; DedeUserID=319136001; DedeUserID__ckMd5=c2fd54a2f5fbb92c; SESSDATA=edc55d5a%2C1629375534%2Caf07a*21; bili_jct=fcc932e20010531a42957e154977371f; CURRENT_FNVAL=80; bsource=search_google; finger=-166317360; arrange=list; PVID=1"
         }
         # 发送HTTP请求获取页面内容
-        response = requests.get(url)
+        response = requests.get(url, headers=headers)
         if response.status_code == 200:
             # 使用lxml解析HTML内容
             tree = html.fromstring(response.content)
