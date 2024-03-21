@@ -9,7 +9,7 @@ def get_bv_list(csv_file_path):
     with open(csv_file_path, 'r', newline='', encoding='utf-8') as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
-            if row and not row[0].startswith('#'):  # Ignore commented lines
+            if row and not row[0].startswith('#'):
                 bv_list.append(row[0])
     return bv_list
 

@@ -12,7 +12,8 @@ def getCidAndTitle(bvid, p=1):
     data = dic_page['data']
     title = data['title']
     cid = data['pages'][p - 1]['cid']
-    return str(cid) if cid else None, title
+    mid = data['owner']['mid']
+    return str(cid) if cid else None, title, mid
 
 
 def getAudioUrl(bvid, cid):
