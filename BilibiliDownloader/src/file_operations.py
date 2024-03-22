@@ -2,6 +2,53 @@
 import csv
 import json
 import os
+import yaml
+
+
+def get_project_directory():
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def get_yaml_content():
+    project_directory = get_project_directory()
+    config_file_path = os.path.join(project_directory, 'config.yaml')
+    with open(config_file_path) as f:
+        data = yaml.load(f, Loader=yaml.FullLoader)
+    return data.get('Paths', {})
+
+
+def save_to_csv(mid_list, filename):
+    with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
+        fieldnames = ['mid', 'name']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for mid, info in mid_list.items():
+            writer.writerow(info)
+
+
+def get_mids_from_csv(filename):
+    mids = []
+    with open(filename, 'r', newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            mid = row['mid']
+            mids.append(mid)
+    return mids
+
+
+def create_mid_folder(mid):
+    project_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    mid_folder = os.path.join(project_directory, 'data', 'mid_' + str(mid))
+    if not os.path.exists(mid_folder):
+        os.makedirs(mid_folder)
+    return mid_folder
+
+
+def save_bv_list_(mid_folder, bvid_list):
+    bv_list_file = os.path.join(mid_folder, 'bv_list.txt')
+    with open(bv_list_file, 'a', encoding='utf-8') as f:
+        for bvid in bvid_list:
+            f.write(bvid + '\n')
 
 
 def get_bv_list(csv_file_path):
@@ -15,17 +62,9 @@ def get_bv_list(csv_file_path):
 
 
 def save_bv_list(csv_file_path, bv_list):
-    if file_exists(csv_file_path):
-        # 获取现有的 bv_list
-        existing_bv_list = get_bv_list(csv_file_path)
-        # 将新的 bv_list 添加到现有的 bv_list 中
-        merged_bv_list = existing_bv_list + bv_list
-    else:
-        merged_bv_list = bv_list
-    # 将后续获取的bv_list添加到csv文件中
     with open(csv_file_path, 'a', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile)
-        for bv in merged_bv_list:
+        for bv in bv_list:
             writer.writerow([bv])
 
 

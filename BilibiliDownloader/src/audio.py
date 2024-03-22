@@ -4,11 +4,14 @@ import urllib
 import urllib.request
 from BilibiliDownloader.src.proxy_pool import request_proxies
 from bilibili_api import getCidAndTitle, getAudioUrl
-from file_operations import get_bv_list, save_information, load_information, file_exists, create_directory
+from file_operations import *
 import argparse
 
 
 def parse_args():
+    project_directory = get_project_directory()
+    data = get_yaml_content()
+    bv_list_file = os.path.join(project_directory, data['bv_list_file'])
     parser = argparse.ArgumentParser(description='Audio Downloader Parameters')
     parser.add_argument('--bv_list_file', default='../data/bv_list.csv', type=str, help='Path to BV list file')
     parser.add_argument('--bv_info_file', default='../data/bv_info.json', type=str, help='Path to BV info file')
