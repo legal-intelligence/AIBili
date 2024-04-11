@@ -4,6 +4,17 @@ import random
 import argparse
 
 
+# 代理IP池
+def get_proxies():
+    proxies = ['125.66.217.114:6675', '112.251.161.82:6675',
+               '117.34.253.157:6675', '113.94.72.209:6666',
+               '114.105.217.144:6673', '125.92.110.80:6675',
+               '112.235.126.55:6675', '14.148.99.188:6675',
+               '112.240.161.20:6668', '122.82.160.148:6675',
+               '175.30.224.66:6675']
+    return proxies
+
+
 def requests_headers():  # 构造请求头池
     head_connection = ['Keep-Alive', 'close']
     head_accept = ['text/html,application/xhtml+xml,*/*']
@@ -46,19 +57,10 @@ def requests_headers():  # 构造请求头池
     return header
 
 
-# 代理IP池
-proxies = ['125.66.217.114:6675', '112.251.161.82:6675',
-           '117.34.253.157:6675', '113.94.72.209:6666',
-           '114.105.217.144:6673', '125.92.110.80:6675',
-           '112.235.126.55:6675', '14.148.99.188:6675',
-           '112.240.161.20:6668', '122.82.160.148:6675',
-           '175.30.224.66:6675']
-
-
 # 抽取IP池IP，构建opener
 def request_proxies():
     header1 = requests_headers()  # 获得随机请求头
-    proxies_handler = urllib.request.ProxyHandler({'http': random.choice(proxies)})
+    proxies_handler = urllib.request.ProxyHandler({'http': random.choice(get_proxies())})
     opener = urllib.request.build_opener(proxies_handler)
     header = []
     for key, value in header1.items():
