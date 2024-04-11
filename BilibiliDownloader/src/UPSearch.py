@@ -10,7 +10,8 @@ from file_operations import save_to_csv, get_yaml_content, get_project_directory
 def parse_args():
     project_directory = get_project_directory()
     data = get_yaml_content()
-    up_list_file = os.path.join(project_directory, data['up_list_file'])
+    data_dir = os.path.join(project_directory, data['data_dir'])
+    up_list_file = os.path.join(data_dir, data['up_list_file'])
     parser = argparse.ArgumentParser(description="UP info download")
     parser.add_argument("--keyword", default="律师", type=str, help="Choose keyword to search up")
     parser.add_argument("--order", default="fans", type=str, help="Choose how to order")
