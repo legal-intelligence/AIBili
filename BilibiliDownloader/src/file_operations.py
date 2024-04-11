@@ -49,6 +49,7 @@ def save_bv_list_(mid_folder, bvid_list):
     with open(bv_list_file, 'a', encoding='utf-8') as f:
         for bvid in bvid_list:
             f.write(bvid + '\n')
+    return bv_list_file
 
 
 def get_bv_list(csv_file_path):

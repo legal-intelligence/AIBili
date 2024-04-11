@@ -6,7 +6,7 @@ import time
 import json
 from BilibiliDownloader.src.proxy_pool import request_proxies
 from file_operations import *
-from audio import *
+from AudioDownloader import *
 
 
 def parse_args():
@@ -55,7 +55,8 @@ class UPDownloader:
         bvid_list = self.download_mid_bid(mid, page)
         if self.structured:
             mid_folder = create_mid_folder(self.mid)
-            save_bv_list_(mid_folder, bvid_list)
+            bv_list_file = save_bv_list_(mid_folder, bvid_list)
+            AudioDownloader(bv_list_file, "", "", 1)
         else:
             save_bv_list(r'../data/bv_list.csv', bvid_list)
 
