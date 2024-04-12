@@ -11,9 +11,10 @@ import argparse
 def parse_args():
     project_directory = get_project_directory()
     data = get_yaml_content()
-    bv_list_file = os.path.join(project_directory, data['bv_list_file'])
-    bv_info_file = os.path.join(project_directory, data['bv_info_file'])
-    download_dir = os.path.join(project_directory, data['download_dir'])
+    data_dir = os.path.join(project_directory, data['data_dir'])
+    bv_list_file = os.path.join(data_dir, data['bv_list_file'])
+    bv_info_file = os.path.join(data_dir, data['bv_info_file'])
+    download_dir = os.path.join(data_dir, data['download_dir'])
     parser = argparse.ArgumentParser(description='Audio Downloader Parameters')
     parser.add_argument('--bv_list_file', default=bv_list_file, type=str, help='Path to BV list file')
     parser.add_argument('--bv_info_file', default=bv_info_file, type=str, help='Path to BV info file')
