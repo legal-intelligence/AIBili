@@ -37,7 +37,7 @@ selenium
 ![coderun.png](coderun.png)
 5. 输入关键词后会输出粉丝数大于`10w`的博主的`uid`
 6. 任选一个uid输入开始下载，过程中会在当前目录下创建data文件夹和audio_download文件夹，有的话则不会创建
-```
+```plain
 data
 ├──uids.txt
 └──audio_contents.csv
