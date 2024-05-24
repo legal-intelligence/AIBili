@@ -1,0 +1,32 @@
+Metadata-Version: 2.1
+Name: bilibiliAudioDownloader
+Version: 0.0.7
+Summary: A tool for downloading audio files from Bilibili videos
+Home-page: https://github.com/legal-intelligence/legal-intelligence/tree/Legal_Video/bilibiliAudioDownloader
+Author: YoMi__token__.21
+Author-email: wanglong67890@outlook.com
+License: MIT
+Keywords: python,audio downloader,Bilibili
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Description-Content-Type: text/markdown
+Requires-Dist: requests
+Requires-Dist: lxml
+Requires-Dist: selenium
+
+# B站批量格式化下载工具
+
+------
+
+## 简介
+
+这是一个用于流程化下载bilibili视频的音频信息的工具，本工具的整体流程为：
+
+1. **输入所需关键词 -> 相关up主uid** 
+2. **选择一个up主uid输入 -> up主页所有视频的bv号**
+3. **bv号 -> 视频链接信息** 
+4. **视频链接 -> 音频信息** 
+
+所有中间流程的信息都会保存至文件中。

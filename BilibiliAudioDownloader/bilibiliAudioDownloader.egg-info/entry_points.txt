@@ -1,0 +1,2 @@
+[console_scripts]
+audio_downloader = bilibiliAudioDownloader.BilibiliAudioDownloader.audio_downloader:main
