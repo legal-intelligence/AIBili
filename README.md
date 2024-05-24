@@ -24,7 +24,7 @@ import BilibiliAudioDownloader
 - 任选一个uid输入开始下载，过程中会在当前目录下创建data文件夹和audio_download文件夹，有的话则不会创建
 
 ## 自行构建步骤
-1. 从Github下载audio_downloader.py文件中的代码
+1. 从Github下载audio_downloader.py文件
 2. 安装python**3.8**或以上版本
 3. 使用pip指令安装依赖  
 ```Plain
@@ -32,7 +32,7 @@ requests
 lxml
 selenium
 ```
-4. 直接运行代码，运行成功会显示类似如下所示内容
+4. 直接运行audio_downloader.py文件中的代码，运行成功会显示类似如下所示内容
 
 ![coderun.png](coderun.png)  
 
