@@ -1,7 +1,0 @@
-Paths:
-  data_dir: data/
-  bv_list_file: bv_list.csv
-  bv_info_file: bv_info.json
-  download_dir: download
-  up_list_file: up_list.csv
-  up_info_file: up_info.json
