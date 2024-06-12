@@ -12,24 +12,43 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
+from utils import assemble_headers
+from utils import SpiderRetry
 
 
-class BilibiliDownloader:
-    def __init__(self, data_folder, audio_folder):
-        self.data_folder = data_folder
-        self.audio_folder = audio_folder
-        if not os.path.exists(self.data_folder):
-            os.makedirs(self.data_folder)
-        if not os.path.exists(self.audio_folder):
-            os.makedirs(self.audio_folder)
-        self.session = self.create_session_with_retries()
+class UPSearch:
+    def __init__(self, keyword, **kwargs):
+        self.random_headers = kwargs.pop('random_headers', False)
+        self.headers = assemble_headers()
+        self.keyword = keyword
 
-    def create_session_with_retries(self):
-        session = requests.Session()
-        retries = Retry(total=5, backoff_factor=1, status_forcelist=[500, 502, 503, 504])
-        session.mount('http://', HTTPAdapter(max_retries=retries))
-        session.mount('https://', HTTPAdapter(max_retries=retries))
-        return session
+    def search(self):
+        url = f'https://search.bilibili.com/upuser?keyword={keyword}&from_source=webtop_search&spm_id_from&order=fans'
+        retry = SpiderRetry(5, ).get()
+        html = response.content.decode('utf-8')
+        content = etree.HTML(html)
+        contents = content.xpath('//*[@id="i_cecream"]/div/div[2]/div[2]/div/div/div[2]/div[1]/div/div/div/p/@title')
+        mid = content.xpath('//*[@id="i_cecream"]/div/div[2]/div[2]/div/div/div[2]/div[1]/div/div/div/h2/a/@href')
+        followers_dict = {}
+        for i in range(len(contents)):
+            match = re.search(r'(\d+\.\d+|\d+)万粉丝', contents[i])
+            if match:
+                followers = float(match.group(1))
+                uid = mid[i].split("/")[-1]
+                followers_dict[uid] = followers
+        followers_gt_10_uid = [uid for uid, followers in followers_dict.items() if followers > 10]
+
+        return followers_gt_10_uid
+
+
+class UPDownloader:
+    def __init__(self, data_folder, audio_folder, **kwargs):
+        pass
+
+
+class BVDownloader:
+    def __init__(self, data_folder, audio_folder, **kwargs):
+        pass
 
     def get_uids_with_keyword(self, keyword):
         header = {
