@@ -4,7 +4,6 @@ import time
 import json
 import csv
 import random
-import requests
 from lxml import etree
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -19,52 +18,89 @@ from typing import Union
 
 
 class UPSearch:
-    def __init__(self, keyword, **kwargs):
-        self.keyword = keyword
-        self.config = kwargs
-        # 验证参数是否提供地址，如果提供地址地址是否合法
+    def __init__(self):
+        pass
+    @staticmethod
+    def search(keyword, **kwargs):
+        keyword_quo = urllib.parse.quote(keyword)
+        order = kwargs.get('order', 'fans')
+        followers = kwargs.get('followers', 0)
+        count = int(kwargs.get('count', 12))
+        page = int(kwargs.get('page', 1))
+        intermediate = kwargs.get('intermediate', False)
+        struct = kwargs.get('struct', True)
+        data_dir = kwargs.get('data_dir')
+        download_dir = kwargs.get('download_dir')
+        File_op = File(data_dir, download_dir)
+        json_list = []
+        url = f'https://search.bilibili.com/upuser'
+        params = {
+            'keyword': keyword_quo,
+            'from_source': 'webtop_search',
+            'order': order,
+            'spm_id_from': ''
+        }
+        response = SpiderRetry().request(url, headers=assemble_headers().get_headers(), params=params)
+        tree = etree.HTML(response.text)
+        mids_info = tree.xpath('//div[@class="b-user-info-card flex_start"]')
+        for i in range(2, page+1):
+            time.sleep(random.uniform(0.1, 0.5))
+            params['page'] = i
+            response = SpiderRetry().request(url, headers=assemble_headers().get_headers(), params=params)
+            tree = etree.HTML(response.text)
+            mids_info.extends(tree.xpath('//div[@class="b-user-info-card flex_start"]'))
+        count_already = 0
+        while count_already < count:
+            mid_info = mids_info[count_already]
+            mid = mid_info.xpath('./a[@class="mr_md"]/@href')[0].rsplit('/')[-1]
+            description = mid_info.xpath('.//p/@title')[0]
+            name = mid_info.xpath('.//h2/a/@title')[0]
+            fans_num = Tools.transfer(description.split(" · ")[0])
+            if fans_num <= followers:
+                break
+            mid_json = {
+                'mid': mid,
+                'name': name,
+                'description': description,
+            }
+            json_list.append(mid_json)
 
-    def search(self):
-        keyword_quo = urllib.parse.puote(self.keyword)
-        order = self.config.get('order', 'fans')
-        followers_ = self.config.get('followers', 10)
-        url = f'https://search.bilibili.com/upuser?keyword={keyword_quo}&from_source=webtop_search&spm_id_from&order={order}'
-        response = SpiderRetry().request(url, headers=assemble_headers().get_headers())
-        html = response.content.decode('utf-8')
-        content = etree.HTML(html)
-        contents = content.xpath('//*[@id="i_cecream"]/div/div[2]/div[2]/div/div/div[2]/div[1]/div/div/div/p/@title')
-        mid = content.xpath('//*[@id="i_cecream"]/div/div[2]/div[2]/div/div/div[2]/div[1]/div/div/div/h2/a/@href')
-        followers_dict = {}
-        for i in range(len(contents)):
-            match = re.search(r'(\d+\.\d+|\d+)万粉丝', contents[i])
-            if match:
-                followers = float(match.group(1))
-                uid = mid[i].split("/")[-1]
-                followers_dict[uid] = followers
-        followers_gt_10_uid = [uid for uid, followers in followers_dict.items() if followers > followers_]
-        data_folder = File().validate_dataPath(config.get('data_path', ''))
-        file_path = os.path.join(data_folder, 'uids.txt')
-        with open(file_path, 'w', encoding='utf-8') as f:
-            for uid in uids:
-                f.write(uid + '\n')
-        if self.config.get("struct"):
-            UPDownloader(followers_gt_10_uid)
-        return followers_gt_10_uid
+        if not struct:
+            File_op.save_json('mid.json', json_list)
+            return f"已获取全部{count_already}位up主信息，信息下载至{File_op.validate_dataPath('')}"
+        return json_list
 
 
 class UPDownloader:
-    def __init__(self, mid: Union[str, list], **kwargs):
-        self.mid = mid
-        self.config = kwargs
-
-    def download(self):
+    def __init__(self):
+        pass
+    @staticmethod
+    def download(mid: Union[str, list], **kwargs):
+        self.struct = self.config.get('struct', True)
         mid = self.mid
         if isinstance(mid, str):
             mid = [mid]
+        for mid_ in mid:
+            url = f'https://search.bilibili.com/upuser?mid={mid_}'
+            response = SpiderRetry().request(url, headers=assemble_headers().get_headers())
+            json_data = json.loads(response.text)
+            if 'code' in json_data:
+                if json_data['code'] == -403:
+                    return
+            bv_info_list = []
+            v_list = json_data['data']['list']['vlist']
+            for v in v_list:
+                bv_json = {
+                    'title': v['title'],
+                    'length': v['length'],
+                    'bvid': v['bvid'],
+                }
+                bv_info_list.append(bv_json)
+            # if not self.config.get("struct"):
 
 
 class BVDownloader:
-    def __init__(self, bv_id: Union[str,list], **kwargs):
+    def __init__(self, bv_id: Union[str, list], **kwargs):
         self.bv_id = bv_id
         self.config = kwargs
 
@@ -81,3 +117,9 @@ class BVDownloader:
             initial_state = json.loads(INITIAL_STATE)
             audio_url = initial_state['data']['dash']['audio'][0]['baseUrl']
             audio_content = requests.get(url=audio_url, headers=header).content
+
+
+if __name__ == '__main__':
+    # upsearch = UPSearch()
+    # upsearch.search('法律')
+    up = UPDownloader

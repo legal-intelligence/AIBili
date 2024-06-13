@@ -1,12 +1,15 @@
+import json
 import os
 
 
 class File:
-    def __init__(self):
+    def __init__(self, data_dir, download_dir):
+        if data_dir:
+            self.data_dir = data_dir
+        if download_dir:
+            self.download_dir = download_dir
         self.data_file = '../data'
         self.download_dir = '../download'
-        self.up_list_file = '../data/up_list.txt'
-        self.bv_list_file = '../data/bv_list.txt'
 
     def validate_dataPath(self, file_name):
         """
@@ -76,4 +79,9 @@ class File:
 
         except Exception as e:
             return f"删除路径 '{path}' 下的文件时发生错误: {str(e)}"
+
+    @staticmethod
+    def save_json(file_name, data):
+        with open(file_name, 'w', encoding='utf-8') as f:
+            f.write(json.dumps(data, indent=4, ensure_ascii=False))
 
