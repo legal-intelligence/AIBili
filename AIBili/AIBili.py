@@ -2,15 +2,8 @@ import os
 import re
 import time
 import json
-import csv
 import random
 from lxml import etree
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
 from utils import *
 from handle import *
 import urllib
@@ -23,9 +16,6 @@ def search(keyword, **kwargs):
     followers = kwargs.get('followers', 0)
     count = int(kwargs.get('count', 12))
     page = int(kwargs.get('page', 1))
-    data_dir = kwargs.get('data_dir')
-
-    File_op = File(data_dir, download_dir)
     json_list = []
     url = f'https://search.bilibili.com/upuser'
     params = {
@@ -61,10 +51,11 @@ def search(keyword, **kwargs):
     return json_list
 
 
-def download(mid: Union[str, list]):
+def up_download(mid: Union[str, list]):
     mid = mid
     if isinstance(mid, str):
         mid = [mid]
+    bv_info_json = {}
     for mid_ in mid:
         url = f'https://search.bilibili.com/upuser?mid={mid_}'
         response = SpiderRetry().request(url, headers=assemble_headers().get_headers())
@@ -81,14 +72,17 @@ def download(mid: Union[str, list]):
                 'bvid': v['bvid'],
             }
             bv_info_list.append(bv_json)
+        bv_info_json[mid_] = bv_info_list
+    return bv_info_json
 
 
-def audioDownload(bv_ids):
+def audio_download(bv_ids: Union[str, list], **kwargs):
     bv_ids = bv_ids
     if isinstance(bv_ids, str):
         bv_ids = [bv_ids]
+    audio_list = []
     for bv_id in bv_ids:
-        url = f'https://www.bilibili.com/video/{bvid}'
+        url = f'https://www.bilibili.com/video/{bv_id}'
         response = requests.get(url, headers=assemble_headers().get_headers())
         html_data = response.text
         title = re.findall('<h1 data-title="(.*?)" title=', html_data)[0]
@@ -96,6 +90,12 @@ def audioDownload(bv_ids):
         initial_state = json.loads(INITIAL_STATE)
         audio_url = initial_state['data']['dash']['audio'][0]['baseUrl']
         audio_content = requests.get(url=audio_url, headers=header).content
+        audio_info_json = {
+            'title': title,
+            'audio': audio_content
+        }
+        audio_list.append(audio_info_json)
+    return audio_list
 
 
 class UPSearch:
@@ -105,12 +105,22 @@ class UPSearch:
         self.followers = kwargs.get('followers', 0)
         self.count = int(kwargs.get('count', 12))
         self.page = int(kwargs.get('page', 1))
-        self.intermediate = kwargs.get('intermediate', False)
+        self.intermediate = kwargs.get('intermediate', True)
         self.struct = kwargs.get('struct', True)
+        self.data_dir = kwargs.get('data_dir')
         self.download_dir = kwargs.get('download_dir')
 
     def search(self):
-        up_list = search(self.key_word)
+        up_info_list = search(self.key_word, order=self.order, followers=self.followers, page=self.page,
+                              count=self.count)
+        bv_info_list = up_download([x['mid'] for x in up_info_list])
+        if self.intermediate:
+            data_dir = File().validate_datapath(self.data_dir)
+            with open(os.path.join(data_dir, 'up_info.json'), 'w') as f:
+                f.write(json.dumps(up_info_list))
+            save_bv_info(bv_info_list, self.struct, data_dir)
+        save_audio(bv_info_list, self.struct, self.download_dir)
+        return f"success"
 
 
 class UPDownloader:
@@ -119,13 +129,36 @@ class UPDownloader:
         if isinstance(mid, str):
             self.mid = [mid]
         self.struct = kwargs.get('struct', True)
+        self.data_dir = kwargs.get('data_dir')
         self.download_dir = kwargs.get('download_dir')
+        self.intermediate = kwargs.get('intermediate', True)
+        self.struct = kwargs.get('struct', True)
 
     def download(self):
-        pass
+        bv_info_list = up_download([x for x in self.mid])
+        if self.intermediate:
+            data_dir = File().validate_datapath(self.data_dir)
+            save_bv_info(bv_info_list, self.struct, data_dir)
+        save_audio(bv_info_list, self.struct, self.download_dir)
 
 
-if __name__ == '__main__':
-    # upsearch = UPSearch()
-    # upsearch.search('法律')
-    up = UPDownloader
+def save_bv_info(bv_info_list, struct, data_dir):
+    if not struct:
+        with open(os.path.join(data_dir, 'bv_info.json'), 'w') as f:
+            f.write(json.dumps(bv_info_list))
+    else:
+        for up_info in bv_info_list.keys():
+            up_path = File().validate_datapath(os.path.join(data_dir, up_info))
+            with open(os.path.join(up_path, 'up_info.json'), 'w') as f:
+                f.write(json.dumps(bv_info_list['up_info']))
+
+
+def save_audio(bv_info_list, struct, download_dir):
+    for mid_bv in bv_info_list.keys():
+        download_dir = File().validate_datapath(download_dir)
+        if struct:
+            download_dir = validate_dir(os.path.join(download_dir, mid_bv))
+        for bvid in bv_info_list.get(mid_bv):
+            audio_info = audio_download(bvid)
+            with open(os.path.join(download_dir, f'{audio_info[0]["title"]}.wav', 'w')) as f:
+                f.write(audio_info[0]['audio'])

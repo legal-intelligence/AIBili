@@ -1,24 +1,60 @@
 import argparse
+import json
+from .AIBili import UPSearch, UPDownloader
 
 
 def main():
-    pass
-
-
-def parse_args():
-    parser = argparse.ArgumentParser(description="AIBili，", prog="AIBili")
-    """
-        B站对于访问api的IP的管控策略是：
-        每十分钟检测一次，若被ban则一次半个小时
-    """
-    # 三个功能，分别是通过关键词获取up主、通过up主主页获取bv信息和通过bv号获取音频
+    parser = argparse.ArgumentParser(description="Bilibili UP user search and download tool")
     subparsers = parser.add_subparsers(dest="command")
-    parser_upsearch = subparsers.add_parser("upsearch", help="Search Aim UP")
-    # 搜索参数组
-    # 排序顺序
-    # 是否结构化
-    # 文件夹地址
-    # 页数
-    # 下载数量
-    # 关键词
-    # 是否保存中间文件
+
+    # Search command
+    search_parser = subparsers.add_parser("search", help="Search for UP users")
+    search_parser.add_argument("keyword", help="Keyword to search for UP users")
+    search_parser.add_argument("--order", default="fans", help="Order of results (default: fans)")
+    search_parser.add_argument("--followers", type=int, default=0, help="Minimum number of followers")
+    search_parser.add_argument("--count", type=int, default=12, help="Number of results to return")
+    search_parser.add_argument("--page", type=int, default=1, help="Number of pages to search")
+    search_parser.add_argument("--data_dir", required=True, help="Directory to save intermediate data")
+    search_parser.add_argument("--download_dir", required=True, help="Directory to save downloaded audio files")
+    search_parser.add_argument("--intermediate", action="store_true", help="Save intermediate data")
+    search_parser.add_argument("--struct", action="store_true", help="Save data in structured format")
+
+    # Download command
+    download_parser = subparsers.add_parser("download", help="Download videos and audio of a UP user")
+    download_parser.add_argument("mid", help="MID of the UP user", nargs="+")
+    download_parser.add_argument("--data_dir", required=True, help="Directory to save intermediate data")
+    download_parser.add_argument("--download_dir", required=True, help="Directory to save downloaded audio files")
+    download_parser.add_argument("--intermediate", action="store_true", help="Save intermediate data")
+    download_parser.add_argument("--struct", action="store_true", help="Save data in structured format")
+
+    args = parser.parse_args()
+
+    if args.command == "search":
+        searcher = UPSearch(
+            key_word=args.keyword,
+            order=args.order,
+            followers=args.followers,
+            count=args.count,
+            page=args.page,
+            data_dir=args.data_dir,
+            download_dir=args.download_dir,
+            intermediate=args.intermediate,
+            struct=args.struct,
+        )
+        result = searcher.search()
+        print(result)
+
+    elif args.command == "download":
+        downloader = UPDownloader(
+            mid=args.mid,
+            data_dir=args.data_dir,
+            download_dir=args.download_dir,
+            intermediate=args.intermediate,
+            struct=args.struct,
+        )
+        downloader.download()
+        print("Download completed.")
+
+
+if __name__ == "__main__":
+    main()

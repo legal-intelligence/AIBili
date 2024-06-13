@@ -3,15 +3,11 @@ import os
 
 
 class File:
-    def __init__(self, data_dir, download_dir):
-        if data_dir:
-            self.data_dir = data_dir
-        if download_dir:
-            self.download_dir = download_dir
+    def __init__(self):
         self.data_file = '../data'
         self.download_dir = '../download'
 
-    def validate_dataPath(self, file_name):
+    def validate_datapath(self, file_name):
         """
         :param file_name:data保存的文件名
         :return:新建好的文件目录
@@ -33,7 +29,7 @@ class File:
         except Exception as e:
             return f"创建路径'P{file_name}'失败：{str(e)}"
 
-    def validate_downloadPath(self, file_name):
+    def validate_download_path(self, file_name):
         """
         :param file_name:download保存的文件目录名
         :return:建好的文件目录
@@ -54,34 +50,16 @@ class File:
         except Exception as e:
             return f"创建路径'P{file_name}'失败：{str(e)}"
 
-    def delete_file(self, path):
-        """
-        :param path:要删除的数据信息的目录路径
-        :return:成功消息或错误消息
-        """
-        if not path:
-            path = self.data_file
-        try:
-            # 确认路径存在并且是一个目录
-            if not os.path.exists(path) or not os.path.isdir(path):
-                return f"删除路径 '{path}' 失败"
 
-            # 遍历目录中的所有文件和子目录
-            for root, dirs, files in os.walk(path, topdown=False):
-                for file in files:
-                    file_path = os.path.join(root, file)
-                    os.remove(file_path)  # 删除文件
-                for dir in dirs:
-                    dir_path = os.path.join(root, dir)
-                    shutil.rmtree(dir_path)  # 递归删除子目录
+def save_json(file_name, data):
+    with open(file_name, 'w', encoding='utf-8') as f:
+        f.write(json.dumps(data, indent=4, ensure_ascii=False))
 
-            return f"成功删除数据文件"
 
-        except Exception as e:
-            return f"删除路径 '{path}' 下的文件时发生错误: {str(e)}"
-
-    @staticmethod
-    def save_json(file_name, data):
-        with open(file_name, 'w', encoding='utf-8') as f:
-            f.write(json.dumps(data, indent=4, ensure_ascii=False))
-
+def validate_dir(folder_path):
+    try:
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+    except Exception as e:
+        return f"新建 '{folder_path}'目录出现问题"
+    return folder_path
