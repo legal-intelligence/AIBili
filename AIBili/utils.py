@@ -1,7 +1,7 @@
 import random
 import requests
-from requests.exceptions import RequestException
 import time
+from exception import *
 
 
 class SpiderRetry:
@@ -17,21 +17,24 @@ class SpiderRetry:
             try:
                 response = requests.get(url, **kwargs)
                 response.raise_for_status()
+                if "风控校验失败" in response.text:
+                    raise VerificationRiskException()
+                if "访问权限不足" in response.text:
+                    raise AuthorityInsufficientException()
                 return response
-            except RequestException as e:
+            except RequestFailedException as e:
                 print(f"请求失败：{e}， 正在重试({retries + 1}/{max_retries})")
                 retries += 1
                 time.sleep(sleep_time)
-            raise Exception(f"请求失败，已重试{max_retriess}次")
+        raise RequestFailedException()
 
 
 class assemble_headers:
     def __init__(self, **kwargs):
         self.random_headers = False
         self.Headers = {
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                          'Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0',
-            "Referer": "https://www.bilibili.com",
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0',
+            # "Referer": "https://www.bilibili.com",
         }
         self.config = kwargs
 
