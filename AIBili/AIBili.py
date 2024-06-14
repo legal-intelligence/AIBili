@@ -74,7 +74,7 @@ def up_download(mid: Union[str, list], **kwargs):
             }
         query = urllib.parse.urlencode(params)
         response = SpiderRetry().request(f'{url}?{query}', headers=headers, params=params,
-                                         cookies=kwargs.get('cookies', None))
+                                         cookies=kwargs.get('cookies'))
         json_data = json.loads(response.text)
         if 'code' in json_data:
             if json_data['code'] == -403:
