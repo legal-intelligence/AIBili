@@ -32,9 +32,11 @@ def search(keyword, **kwargs):
         params['page'] = i
         response = SpiderRetry().request(url, headers=assemble_headers().get_headers(), params=params)
         tree = etree.HTML(response.text)
-        mids_info.extends(tree.xpath('//div[@class="b-user-info-card flex_start"]'))
+        mids_info.extend(tree.xpath('//div[@class="b-user-info-card flex_start"]'))
     count_already = 0
     while count_already < count:
+        if count_already == len(mids_info):
+            break
         mid_info = mids_info[count_already]
         mid = mid_info.xpath('./a[@class="mr_md"]/@href')[0].rsplit('/')[-1]
         description = mid_info.xpath('.//p/@title')[0]
@@ -48,6 +50,7 @@ def search(keyword, **kwargs):
             'description': description,
         }
         json_list.append(mid_json)
+        count_already += 1
     return json_list
 
 
@@ -102,10 +105,9 @@ def audio_download(bv_ids: Union[str, list], **kwargs):
         response = requests.get(url, headers=assemble_headers().get_headers())
         html_data = response.text
         title = re.findall('<h1 data-title="(.*?)" title=', html_data)[0]
-        INITIAL_STATE = re.findall('<script>window.__playinfo__=(.*?)</script>', html_data)[0]
-        initial_state = json.loads(INITIAL_STATE)
+        initial_state = json.loads(re.findall('<script>window.__playinfo__=(.*?)</script>', html_data)[0])
         audio_url = initial_state['data']['dash']['audio'][0]['baseUrl']
-        audio_content = requests.get(url=audio_url, headers=header).content
+        audio_content = requests.get(url=audio_url, headers=assemble_headers().get_headers()).content
         audio_info_json = {
             'title': title,
             'audio': audio_content
@@ -174,15 +176,15 @@ def save_bv_info(bv_info_list, struct, data_dir):
         for up_info in bv_info_list.keys():
             up_path = File().validate_datapath(os.path.join(data_dir, up_info))
             with open(os.path.join(up_path, 'up_info.json'), 'w') as f:
-                f.write(json.dumps(bv_info_list['up_info']))
+                f.write(json.dumps(bv_info_list[up_info]))
 
 
 def save_audio(bv_info_list, struct, download_dir):
+    download_dir = File().validate_datapath(download_dir)
     for mid_bv in bv_info_list.keys():
-        download_dir = File().validate_datapath(download_dir)
         if struct:
             download_dir = validate_dir(os.path.join(download_dir, mid_bv))
         for bvid in bv_info_list.get(mid_bv):
             audio_info = audio_download(bvid)
-            with open(os.path.join(download_dir, f'{audio_info[0]["title"]}.wav', 'w')) as f:
+            with open(os.path.join(download_dir, f'{audio_info[0]["title"]}.wav', 'wb')) as f:
                 f.write(audio_info[0]['audio'])
