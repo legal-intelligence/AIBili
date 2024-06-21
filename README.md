@@ -1,51 +1,50 @@
-# BilibiliAudioDownloader
-## 哔哩哔哩音频下载器
+# AIBili
 
-根据输入所需数据的关键词筛选粉丝数大于`10w`的博主的`uid`，任选一个`uid`输入即可开始下载该up主主页所有视频的音频信息
+AIBili，支持根据关键词批量获取Up主信息，并根据Up主uid获取其主页所有视频
 
+## 安装
 
-## 调包
-1. 安装python**3.8**或以上版本
-2. 进入cmd界面 
-```Plain
-pip install BilibiliAudioDownloader
+### 从GitHub手动拉取源码安装
+
+```
+git clone 
+cd
+pip install
 ```
 
-```Plain
-python
-```
+## 主要功能
 
-```Plain
-import BilibiliAudioDownloader
-```
-- 请输入关键词：  
+### 单个功能
 
-- 输入关键词后会输出粉丝数大于`10w`的博主的`uid`  
-- 任选一个uid输入开始下载，过程中会在当前目录下创建data文件夹和audio_download文件夹，有的话则不会创建
+| 方法名         | 功能                                   | 参数                                                         |
+| -------------- | -------------------------------------- | ------------------------------------------------------------ |
+| search         | 通过关键词与条件获取符合要求的up主信息 | 关键词<br />排序方式<br />粉丝数下限<br />爬取数量<br />..... |
+| up_download    | 通过up主mid获取主页视频                | mid<br />cookies<br />headers<br />........                  |
+| audio_download | 通过bv号获取音频                       | bv<br />........                                             |
 
-## 自行构建步骤
-1. 从Github下载audio_downloader.py文件
-2. 安装python**3.8**或以上版本
-3. 使用pip指令安装依赖  
-```Plain
-requests
-lxml
-selenium
-```
-4. 直接运行audio_downloader.py文件中的代码，运行成功会显示类似如下所示内容
+## 链式方法
 
-![coderun.png](coderun.png)  
+| 类名         | 功能                   | 参数                     |
+| ------------ | ---------------------- | ------------------------ |
+| UPSearch     | 搜索up主信息并下载bv   | 关键词<br />其余上述参数 |
+| UPDownloader | 通过单个up主信息下载bv | mid<br />其余上述参数    |
 
-5. 输入关键词后会输出粉丝数大于`10w`的博主的`uid`
-   
-6. 任选一个uid输入开始下载，过程中会在当前目录下创建data文件夹和audio_download文件夹，有的话则不会创建
-```plain
-data
-├──uids.txt
-└──audio_contents.csv
+### 使用方法
 
-audio_download
-```
-（1）`uids.txt`文件中包含大于`10w`粉丝博主的`uid`  
-（2）`audio_download`文件用于存储下载好的音频
+- 可以直接调用方法，这样返回的是json格式
+- 通过类进行链式调用，返回下载好的文件
 
+### 其他参数
+
+**struct**
+
+直接下载到download_dir或者根据up主下载到不同的file
+
+## 说明
+
+在下载up主首页视频信息时，可能会出现风控报错，这时就要求用户填入自己的cookies、headers以让功能正常进行。
+
+## 补充说明
+
+在任务逻辑之下，B站的风控一直是难以绕过的问题，最后提供了用户信息补充路径，但并不是最佳的解决办法，不过作为一个小功能，AIBIili已经完成了自己的使命。<br>
+希望对你的工作有帮助。
